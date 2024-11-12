@@ -87,18 +87,21 @@ def check_posture(image, keypoint, box, postures_to_check=None):
     if postures_to_check is None:
         print("Add body posture to check")
     
-    def evaluate_posture_condition(p1, p2, p3, angle_name):
+    def evaluate_posture_condition(image,p1, p2, p3, angle_name):
         angle = calculate_angle(p1, p2, p3)
         if angle not in range(90, 120):
             response_text = f"{angle_name}_{angle}"
-            image = add_text_top_left(image, text=response_text, position=box_tl, color=(0, 0, 255))
+            image = add_text_top_left(image, text=response_text, position=p2, color=(0, 0, 255), font_scale=0.7)
+        else:
+            response_text = f"{angle_name}_{angle}"
+            image = add_text_top_left(image, text=response_text, position=p2, color=(0, 255, 0), font_scale=0.7)
         return image
 
     box_tl = (int(box[0]), int(box[1])+20)
 
     if "back" in postures_to_check:
         # Back posture condition
-        image = evaluate_posture_condition(
+        image = evaluate_posture_condition(image,
             kpxy(image, keypoint[6]),
             kpxy(image, keypoint[12]),
             kpxy(image, keypoint[14]),
@@ -107,7 +110,7 @@ def check_posture(image, keypoint, box, postures_to_check=None):
 
     if "shoulder" in postures_to_check:
         # Shoulder posture condition
-        image = evaluate_posture_condition(
+        image = evaluate_posture_condition(image,
             kpxy(image, keypoint[6]),
             kpxy(image, keypoint[8]),
             kpxy(image, keypoint[10]),
@@ -117,7 +120,7 @@ def check_posture(image, keypoint, box, postures_to_check=None):
 
     if "leg" in postures_to_check:
         # Leg posture condition
-        image = evaluate_posture_condition(
+        image = evaluate_posture_condition(image,
             kpxy(image, keypoint[12]),
             kpxy(image, keypoint[14]),
             kpxy(image, keypoint[16]),
@@ -132,7 +135,7 @@ def check_posture(image, keypoint, box, postures_to_check=None):
 model = YOLO("yolo11n-pose.pt")  # load an official pose model
 
 # Open video file
-cap = cv2.VideoCapture("my_video.mp4")
+cap = cv2.VideoCapture("test_videos\squarts_short.mp4")
 
 # Get frame width and height
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -160,17 +163,17 @@ while cap.isOpened():
     # Process results list
     i=0
     for keypoint, box in zip(keypoints,boxes):
-        image = check_posture(image, keypoint, box, postures_to_check=['back'])
+        image = check_posture(image, keypoint, box, postures_to_check=['back','shoulder','leg'])
 
     # Display the frame with pose overlay
     cv2.imshow("Pose Estimation", cv2.resize(image, (1080, 720)))
     # # Write the frame with pose drawing to the output video
-    out.write(image)
+    # out.write(image)
     # Break the loop when 'q' is pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 # Release resources
 cap.release()
-out.release()
+# out.release()
 cv2.destroyAllWindows()
