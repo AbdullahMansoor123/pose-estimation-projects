@@ -147,6 +147,8 @@ while cap.isOpened():
     # Keypoints object for pose outputs
     keypoints = results.keypoints.xyn.tolist()
     image = results.plot(boxes=False, kpt_radius=2)
+    
+    # UNCOMMIT to visualize keypoint numbering
     # image = visual_keypoints(image,keypoints)
 
     # Process keypoints to check posture for different body parts
