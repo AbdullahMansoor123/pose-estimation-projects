@@ -3,26 +3,6 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 
-#keypoint map
-# body_parts = {
-#     0: "Nose",
-#     1: "L_Eye",
-#     2: "R_Eye",
-#     3: "L_Ear",
-#     4: "R_Ear",
-#     5: "L_Shldr",
-#     6: "R_Shldr",
-#     7: "L_Elbow",
-#     8: "R_Elbow",
-#     9: "L_Wrist",
-#     10: "R_Wrist",
-#     11: "L_Hip",
-#     12: "R_Hip",
-#     13: "L_Knee",
-#     14: "R_Knee",
-#     15: "L_Ankle",
-#     16: "R_Ankle"
-# }
 
 
 # Angle Calculator
@@ -38,8 +18,12 @@ def calculate_angle(p1, p2, p3):
     
     # Convert to degrees
     angle_deg = np.degrees(angle_rad)
+    if not np.isnan(angle_deg):
+        angle_deg
+        return int(angle_deg)
+    else:
+        pass 
     
-    return int(angle_deg)
 
 def kpxy(image,point):
     '''get keypoint in x,y with respect to image'''
@@ -83,6 +67,12 @@ def add_text_top_left(image, text, position, font=cv2.FONT_HERSHEY_SIMPLEX, font
 def check_posture(image, keypoint, box, postures_to_check=None):
     """
     postures_to_check = ["back", "shoulder", "leg"]
+
+    body_keypoints = [(0, "Nose"), (1, "L_Eye"), (2, "R_Eye"), (3, "L_Ear"), (4, "R_Ear"), 
+                    (5, "L_Shldr"), (6, "R_Shldr"), (7, "L_Elbow"), (8, "R_Elbow"), 
+                    (9, "L_Wrist"), (10, "R_Wrist"), (11, "L_Hip"), (12, "R_Hip"), 
+                    (13, "L_Knee"), (14, "R_Knee"), (15, "L_Ankle"), (16, "R_Ankle")]
+
     """
     if postures_to_check is None:
         print("Add body posture to check")
@@ -90,14 +80,16 @@ def check_posture(image, keypoint, box, postures_to_check=None):
     def evaluate_posture_condition(image,p1, p2, p3, angle_name):
         angle = calculate_angle(p1, p2, p3)
         if angle not in range(90, 120):
-            response_text = f"{angle_name}_{angle}"
+            response_text = f"{angle}"
             image = add_text_top_left(image, text=response_text, position=p2, color=(0, 0, 255), font_scale=0.7)
+        elif np.isnan(angle):
+            image
         else:
-            response_text = f"{angle_name}_{angle}"
+            response_text = f"{angle}"
             image = add_text_top_left(image, text=response_text, position=p2, color=(0, 255, 0), font_scale=0.7)
         return image
 
-    box_tl = (int(box[0]), int(box[1])+20)
+    # box_tl = (int(box[0]), int(box[1])+20)
 
     if "back" in postures_to_check:
         # Back posture condition
@@ -117,7 +109,6 @@ def check_posture(image, keypoint, box, postures_to_check=None):
             "AA"
         )
 
-
     if "leg" in postures_to_check:
         # Leg posture condition
         image = evaluate_posture_condition(image,
@@ -126,16 +117,14 @@ def check_posture(image, keypoint, box, postures_to_check=None):
             kpxy(image, keypoint[16]),
             "leg"
         )
-
     return image
-
 
 
 # Load pose model
 model = YOLO("yolo11n-pose.pt")  # load an official pose model
 
 # Open video file
-cap = cv2.VideoCapture("test_videos\squarts_short.mp4")
+cap = cv2.VideoCapture("test_videos\\my_video.mp4")
 
 # Get frame width and height
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -143,7 +132,7 @@ frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 # Define video writer to save output
 fourcc = cv2.VideoWriter_fourcc(*'XVID')  # You can change codec if needed
-out = cv2.VideoWriter('my_output_video_.avi', fourcc, 20.0, (frame_width, frame_height))
+out = cv2.VideoWriter('my_output_video.avi', fourcc, 20.0, (frame_width, frame_height))
 
 # Loop over frames
 
@@ -157,23 +146,22 @@ while cap.isOpened():
 
     # Keypoints object for pose outputs
     keypoints = results.keypoints.xyn.tolist()
-    kp_image = results.plot(boxes=False, kpt_radius=2)
-    image = visual_keypoints(kp_image,keypoints)
+    image = results.plot(boxes=False, kpt_radius=2)
+    # image = visual_keypoints(image,keypoints)
 
-    # Process results list
-    i=0
+    # Process keypoints to check posture for different body parts
     for keypoint, box in zip(keypoints,boxes):
         image = check_posture(image, keypoint, box, postures_to_check=['back','shoulder','leg'])
 
     # Display the frame with pose overlay
-    cv2.imshow("Pose Estimation", cv2.resize(image, (1080, 720)))
+    # cv2.imshow("Pose Estimation", cv2.resize(image, (720, 720)))
     # # Write the frame with pose drawing to the output video
-    # out.write(image)
+    out.write(image)
     # Break the loop when 'q' is pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 # Release resources
 cap.release()
-# out.release()
+out.release()
 cv2.destroyAllWindows()
