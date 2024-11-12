@@ -1,9 +1,18 @@
 import os
+import datetime
 from ultralytics import YOLO
 import cv2
 import numpy as np
 
 
+def generate_video_name(output_video_path):
+    # Get the current date and time
+    now = datetime.datetime.now()
+    # Format it into a compressed string: YYYYMMDD_HHMMSS
+    timestamp = now.strftime("%Y%m%d_%H%M%S")
+    extension = output_video_path.split('.')[-1]
+    new_video_name = f"video_{timestamp}.{extension}"
+    return new_video_name
 
 # Angle Calculator
 def calculate_angle(p1, p2, p3):
@@ -124,7 +133,7 @@ def check_posture(image, keypoint, box, postures_to_check=None):
 model = YOLO("yolo11n-pose.pt")  # load an official pose model
 
 # Open video file
-cap = cv2.VideoCapture("test_videos\\my_video.mp4")
+cap = cv2.VideoCapture("test_videos\pose_test.mp4")
 
 # Get frame width and height
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -132,7 +141,8 @@ frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 # Define video writer to save output
 fourcc = cv2.VideoWriter_fourcc(*'XVID')  # You can change codec if needed
-out = cv2.VideoWriter('my_output_video.avi', fourcc, 20.0, (frame_width, frame_height))
+output_video_path = generate_video_name('my_output_video.avi')
+out = cv2.VideoWriter(output_video_path, fourcc, 20.0, (frame_width, frame_height))
 
 # Loop over frames
 
