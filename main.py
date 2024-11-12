@@ -3,7 +3,6 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 
-<<<<<<< HEAD
 #keypoint map
 # body_parts = {
 #     0: "Nose",
@@ -129,20 +128,11 @@ def check_posture(image, keypoint, box, postures_to_check=None):
 
 
 
-=======
-# Detection model (for person detection)
-det_model = YOLO("yolov8n.pt")
-
->>>>>>> 47fc2bf2742ffa28dc0aedd844a370d8c8d548b9
 # Load pose model
 model = YOLO("yolo11n-pose.pt")  # load an official pose model
 
 # Open video file
-<<<<<<< HEAD
 cap = cv2.VideoCapture("my_video.mp4")
-=======
-cap = cv2.VideoCapture("1.mp4")
->>>>>>> 47fc2bf2742ffa28dc0aedd844a370d8c8d548b9
 
 # Get frame width and height
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -150,11 +140,7 @@ frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 # Define video writer to save output
 fourcc = cv2.VideoWriter_fourcc(*'XVID')  # You can change codec if needed
-<<<<<<< HEAD
 out = cv2.VideoWriter('my_output_video_.avi', fourcc, 20.0, (frame_width, frame_height))
-=======
-out = cv2.VideoWriter('output_video.avi', fourcc, 20.0, (frame_width, frame_height))
->>>>>>> 47fc2bf2742ffa28dc0aedd844a370d8c8d548b9
 
 # Loop over frames
 
@@ -166,7 +152,6 @@ while cap.isOpened():
     results = model(image)[0]  # Predict on an image
     boxes = results.boxes.xyxy.tolist()
 
-<<<<<<< HEAD
     # Keypoints object for pose outputs
     keypoints = results.keypoints.xyn.tolist()
     kp_image = results.plot(boxes=False, kpt_radius=2)
@@ -181,19 +166,6 @@ while cap.isOpened():
     cv2.imshow("Pose Estimation", cv2.resize(image, (1080, 720)))
     # # Write the frame with pose drawing to the output video
     out.write(image)
-=======
-    # Run pose detection on the frame
-    results = model(frame)
-    keypoints = results[0].keypoints
-    frame = results[0].plot(boxes=False, kpt_radius=2)
-
-    # Write the frame with pose drawing to the output video
-    out.write(frame)
-
-    # Display the frame with pose overlay
-    cv2.imshow("Pose Estimation", frame)
-
->>>>>>> 47fc2bf2742ffa28dc0aedd844a370d8c8d548b9
     # Break the loop when 'q' is pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
@@ -201,8 +173,4 @@ while cap.isOpened():
 # Release resources
 cap.release()
 out.release()
-<<<<<<< HEAD
 cv2.destroyAllWindows()
-=======
-cv2.destroyAllWindows()
->>>>>>> 47fc2bf2742ffa28dc0aedd844a370d8c8d548b9
