@@ -79,7 +79,7 @@ def check_posture(image, keypoint, box, postures_to_check=None):
     
     def evaluate_posture_condition(image,p1, p2, p3, angle_name):
         angle = calculate_angle(p1, p2, p3)
-        if angle not in range(90, 120):
+        if angle not in range(90, 121):
             response_text = f"{angle}"
             image = add_text_top_left(image, text=response_text, position=p2, color=(0, 0, 255), font_scale=0.7)
         elif np.isnan(angle):
